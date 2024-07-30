@@ -57,6 +57,7 @@ def img_operate_test(img_path, model, save_path, conf, iou, resize):
     # Get list of all images in the directory
     # Initialize index for image list
     # Read image from path
+    create_directory(save_path)
     filename = os.path.basename(img_path)
     frame = cv2.imread(img_path)
     frame = cv2.resize(frame, (0, 0), fx=resize, fy=resize)
@@ -79,7 +80,7 @@ def img_operate_test(img_path, model, save_path, conf, iou, resize):
     # Display the image with detections
     predix = int(time.time_ns())
     # 保存截图,可选
-    # cv2.imwrite(f'{save_path}\\{predix}_{filename}.jpg', frame)
+    cv2.imwrite(f'{save_path}/{predix}_{filename}.jpg', frame)
     cv2.imshow('Detections', frame)
     # Wait for user input
     key = cv2.waitKey(0)
