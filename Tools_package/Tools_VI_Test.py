@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import os
 import time
 import torch
 import cv2
 
 
-def video_operate_test(video_path, model, save_path, conf, iou, resize):
+def video_operate_test(video_path, model, save_path, conf, iou, max_size):
     cap = cv2.VideoCapture(video_path)
     frame_num = 0
     create_directory(save_path)
@@ -17,11 +18,9 @@ def video_operate_test(video_path, model, save_path, conf, iou, resize):
 
         height, width = frame.shape[:2]
         # 计算新的尺寸
-        new_width = int(width * resize)
-        new_height = int(height * resize)
         # 使用cv2.resize调整图像大小
         # 注意：第二个参数是（宽度，高度），这是一个常见的陷阱
-        frame = cv2.resize(frame, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
+        frame = adaptive_resize(frame, max_size)
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         with torch.no_grad():
@@ -37,10 +36,6 @@ def video_operate_test(video_path, model, save_path, conf, iou, resize):
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
                     cv2.putText(frame, str(float(box.conf)), (int(x1), int(y1) - 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-        frame_num += 1
-        predix = int(time.time_ns())
-        # 保存截图,可选
-        # cv2.imwrite(f'{save_path}\\{predix}_{frame_num}.jpg', frame)
         cv2.imshow('Detected', frame)
         cv2.waitKey(1)
     cap.release()
@@ -53,14 +48,21 @@ def create_directory(path):
         os.makedirs(path)
 
 
-def img_operate_test(img_path, model, save_path, conf, iou, resize):
+def adaptive_resize(frame, max_size):
+    height, width = frame.shape[:2]
+    scale = max_size / max(height, width)
+    return cv2.resize(frame, None, fx=scale, fy=scale)
+
+def img_operate_test(img_path, model, save_path, conf, iou, max_size):
     # Get list of all images in the directory
     # Initialize index for image list
     # Read image from path
     create_directory(save_path)
     filename = os.path.basename(img_path)
     frame = cv2.imread(img_path)
-    frame = cv2.resize(frame, (0, 0), fx=resize, fy=resize)
+    if frame is None:
+        return
+    frame = adaptive_resize(frame, max_size)
     # Convert BGR image to RGB
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     # Perform inference with the model
@@ -78,9 +80,6 @@ def img_operate_test(img_path, model, save_path, conf, iou, resize):
             label = f"Conf: {conf:.2f}"
             cv2.putText(frame, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
     # Display the image with detections
-    predix = int(time.time_ns())
-    # 保存截图,可选
-    cv2.imwrite(f'{save_path}/{predix}_{filename}.jpg', frame)
     cv2.imshow('Detections', frame)
     # Wait for user input
     key = cv2.waitKey(0)
@@ -89,17 +88,3 @@ def img_operate_test(img_path, model, save_path, conf, iou, resize):
         print("Space bar was pressed. Exiting.")
         return  # Exit the function immediately when space is pressed
     return
-
-
-def is_video_or_image(filename):
-    video_extensions = ['.mp4', '.avi', '.mkv', '.mov', '.wmv']
-    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
-
-    _, ext = os.path.splitext(filename)
-
-    if ext.lower() in video_extensions:
-        return 1
-    elif ext.lower() in image_extensions:
-        return 0
-    else:
-        return -1

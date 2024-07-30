@@ -31,7 +31,7 @@ def main_switch(operation_num):
     '''
         给出图片的文件夹即可,自己给,这个一定要看,注意
     '''
-    image_directory = r"D:\Pussy_datasets\test"
+    image_directory = r"D:\迅雷下载"
     if not os.path.exists(image_directory):
         print(f"文件夹 {image_directory} 不存在.")
         return
@@ -40,7 +40,10 @@ def main_switch(operation_num):
         print(f"开始执行操作：{operation}...")
 
         if operation == 'prepare_data':
-            move_files_and_delete_dirs(image_directory)
+            for filename in os.listdir(image_directory):
+                # print(f"正在处理文件：{filename}")
+                # print(os.path.join(image_directory, filename))
+                move_files_and_delete_dirs(os.path.join(image_directory, filename))
             # 可选操作：重命名文件,如果文件已经是全英文/数字不需要重命名
             # rename_files(image_directory)
             # 可选操作：处理媒体文件,移动所有视频文件到另一个目录
@@ -78,5 +81,5 @@ def main_switch(operation_num):
 # 选择功能
 if __name__ == '__main__':
     operation_num = int(input(
-        "请输入你想要执行的操作编号（1-准备数据(不执行1别执行其他的,在打标之前执行,其他的在打标之后执行)，2-数据增强，3-划分数据集为coco格式，4-测试结果）:"))
+        "请输入你想要执行的操作编号\n1-准备数据(不执行1别执行其他的,在打标之前执行,其他的在打标之后执行)，\n2-数据增强\n3-划分数据集为coco格式\n4-测试结果:\n"))
     main_switch(operation_num)
