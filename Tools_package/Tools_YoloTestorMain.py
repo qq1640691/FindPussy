@@ -19,16 +19,16 @@ def is_media_file(filepath):
 '''想看视频取消注释'''
 
 
-def yolo_test(data_path, model, save_path_img, save_path_video, confidence, iou, resize):
+def yolo_test(data_path, model, confidence, iou, resize):
     for root, dirs, files in os.walk(data_path):
         for file in files:
             filepath = os.path.join(root, file)
             media_type = is_media_file(filepath)
 
             if media_type == 'image':
-                img_operate_test(filepath, model, save_path_img, confidence, iou, resize)
+                img_operate_test(filepath, model, confidence, iou, resize)
             elif media_type == 'video':
-                # video_operate_test(filepath, model, save_path_video, confidence, iou, resize)
+                # video_operate_test(filepath, model, confidence, iou, resize)
                 pass
 
 

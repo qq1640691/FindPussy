@@ -5,19 +5,14 @@ import torch
 import cv2
 
 
-def video_operate_test(video_path, model, save_path, conf, iou, max_size):
+def video_operate_test(video_path, model, conf, iou, max_size):
     cap = cv2.VideoCapture(video_path)
-    frame_num = 0
-    create_directory(save_path)
-
     while True:
         ret, frame = cap.read()
         if not ret:
             print("Finished processing video.")
             break
 
-        height, width = frame.shape[:2]
-        # 计算新的尺寸
         # 使用cv2.resize调整图像大小
         # 注意：第二个参数是（宽度，高度），这是一个常见的陷阱
         frame = adaptive_resize(frame, max_size)
@@ -53,12 +48,8 @@ def adaptive_resize(frame, max_size):
     scale = max_size / max(height, width)
     return cv2.resize(frame, None, fx=scale, fy=scale)
 
-def img_operate_test(img_path, model, save_path, conf, iou, max_size):
-    # Get list of all images in the directory
-    # Initialize index for image list
+def img_operate_test(img_path, model, conf, iou, max_size):
     # Read image from path
-    create_directory(save_path)
-    filename = os.path.basename(img_path)
     frame = cv2.imread(img_path)
     if frame is None:
         return
@@ -71,6 +62,7 @@ def img_operate_test(img_path, model, save_path, conf, iou, max_size):
     # Process detections and display them on the image
     for result in results:
         boxes = result.boxes
+        print("boxes:", boxes)
         for box in boxes:
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             conf = box.conf[0].item()
